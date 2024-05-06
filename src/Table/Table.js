@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   useReactTable,
   flexRender,
@@ -26,44 +26,8 @@ const TanTable = () => {
     { header: "Age", accessorKey: "age" },
     { header: "Year", accessorKey: "year" },
   ];
-
-  const [editRowId, setEditRowId] = useState(null);
-  const [editColumnId, setEditColumnId] = useState(null);
-  const [editValue, setEditValue] = useState("");
   const [sorting, setSorting] = useState([]);
   const [filtering, setFiltering] = useState("");
-
-  const handleCellClick = (rowGroup, cellEl) => {
-    const rowId = rowGroup.id;
-    const columnId = cellEl.column.id;
-    const cellValue = cellEl.renderValue(cellEl.column.id);
-
-    console.log("Clicked cell:", rowId, columnId, cellValue);
-
-    if (rowId != null && columnId != null && cellValue != null) {
-      setEditRowId(rowId);
-      setEditColumnId(columnId);
-      setEditValue(cellValue.toString());
-    } else {
-      console.error(
-        "Invalid parameters in handleCellClick:",
-        rowId,
-        columnId,
-        cellValue
-      );
-    }
-  };
-
-  const handleEditChange = (e) => {
-    setEditValue(e.target.value);
-  };
-
-  const handleEditSave = () => {
-    // Handle editing logic here
-    console.log("Editing value:", editValue);
-    setEditRowId(null);
-    setEditColumnId(null);
-  };
 
   const table = useReactTable({
     columns: columns,
@@ -84,7 +48,7 @@ const TanTable = () => {
     <>
       <div className="filter-container">
         <TextField
-          placeholder="search"
+          placeholder="Search"
           variant="standard"
           value={filtering}
           onChange={(e) => setFiltering(e.target.value)}
@@ -121,48 +85,19 @@ const TanTable = () => {
             <TableBody>
               {table.getRowModel().rows.map((rowGroup) => (
                 <TableRow key={rowGroup.id}>
-                  {rowGroup.getVisibleCells().map((cellEl) => {
-                    console.log("rowGroup:", rowGroup);
-                    console.log("cellEl:", cellEl);
-                    const columnId = cellEl.column.id;
-                    const cellValue = cellEl.renderValue(cellEl.column.id);
-                    if (
-                      typeof columnId === "undefined" ||
-                      typeof cellValue === "undefined"
-                    ) {
-                      console.error(
-                        "Invalid parameters in handleCellClick:",
-                        rowGroup.id,
-                        columnId,
-                        cellValue
-                      );
-                      return null;
-                    }
-                    const isEditing =
-                      editRowId === rowGroup.id && editColumnId === columnId;
-                    return (
-                      <TableCell key={cellEl.id}>
-                        {isEditing ? (
-                          <TextField
-                            type="text"
-                            value={editValue}
-                            onChange={handleEditChange}
-                            onBlur={handleEditSave}
-                            autoFocus
-                          />
-                        ) : (
-                          <div
-                            onClick={() => handleCellClick(rowGroup, cellEl)}
-                          >
-                            {flexRender(
-                              cellEl.column.columnDef.cell,
-                              cellEl.getContext()
-                            )}
-                          </div>
+                  {rowGroup.getVisibleCells().map((cellEl) => (
+                    <TableCell key={cellEl.id}>
+                      <div
+                        contentEditable={true} // Enable inline editing
+                        suppressContentEditableWarning={true}
+                      >
+                        {flexRender(
+                          cellEl.column.columnDef.cell,
+                          cellEl.getContext()
                         )}
-                      </TableCell>
-                    );
-                  })}
+                      </div>
+                    </TableCell>
+                  ))}
                 </TableRow>
               ))}
             </TableBody>
@@ -199,4 +134,4 @@ const TanTable = () => {
   );
 };
 
-export default TanTable;
+export default TanTable;
